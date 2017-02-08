@@ -42,5 +42,10 @@ module.exports = {
             "@angular/upgrade/static": "@angular/upgrade/bundles/upgrade-static.umd.js"
         }
     },
+    scripts: {
+        build: "webpack -d",
+        prebuild: "npm install",
+        watch: "webpack --watch -d"
+    },
     watch: true
 };
