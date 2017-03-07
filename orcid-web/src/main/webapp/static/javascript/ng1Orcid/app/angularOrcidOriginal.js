@@ -191,75 +191,6 @@ angular.module('orcidApp').controller('EditTableCtrl', ['$scope', function ($sco
     $scope.socialNetworksUpdateToggleText();
 }]);
 
-angular.module('orcidApp').controller('NotificationPreferencesCtrl',['$scope', '$compile', 'emailSrvc', 'prefsSrvc', 'emailSrvc',function ($scope, $compile, emailSrvc, prefsSrvc, emailSrvc) {
-    $scope.prefsSrvc = prefsSrvc;
-    $scope.emailSrvc = emailSrvc;
-}]);
-
-angular.module('orcidApp').controller('EmailFrequencyCtrl',['$scope', '$compile', 'emailSrvc', 'prefsSrvc', function ($scope, $compile, emailSrvc, prefsSrvc) {
-    $scope.prefsSrvc = prefsSrvc;
-    $scope.emailSrvc = emailSrvc;
-    
-}]);
-
-angular.module('orcidApp').controller('EmailFrequencyLinkCtrl',['$scope','$rootScope', function ($scope, $rootScope) {
-    $scope.getEmailFrequencies = function() {
-        $.ajax({
-            url: window.location.href + '/email-frequencies.json',
-            type: 'GET',
-            dataType: 'json',
-            success: function(data) {
-                $scope.emailFrequency = data;
-                $rootScope.$apply();
-            }
-        }).fail(function() {
-            console.log("error with frequency");
-        });
-    };
-    
-    $scope.saveEmailFrequencies = function() {
-        $.ajax({
-            url: window.location.href + '/email-frequencies.json',
-            type: 'POST',
-            data: angular.toJson($scope.emailFrequency),
-            contentType: 'application/json;charset=UTF-8',
-            dataType: 'json',
-            success: function(data) {
-                $scope.emailFrequency = data;
-                $rootScope.$apply();
-            }
-        }).fail(function() {
-            console.log("error with frequency");
-        });
-    };
-    
-    $scope.getEmailFrequencies();
-}]);
-
-angular.module('orcidApp').controller('WorksPrivacyPreferencesCtrl',['$scope', 'prefsSrvc', 'commonSrvc', function ($scope, prefsSrvc, commonSrvc) {
-    $scope.prefsSrvc = prefsSrvc;
-    $scope.privacyHelp = {};
-    $scope.showElement = {};
-    $scope.commonSrvc = commonSrvc;
-
-    $scope.toggleClickPrivacyHelp = function(key) {
-        if (!document.documentElement.className.contains('no-touch'))
-            $scope.privacyHelp[key]=!$scope.privacyHelp[key];
-    };
-
-    $scope.updateActivitiesVisibilityDefault = function(priv, $event) {
-        $scope.prefsSrvc.prefs.activitiesVisibilityDefault.value = priv;
-        $scope.prefsSrvc.savePrivacyPreferences();
-    };
-    
-    $scope.showTooltip = function(el){
-        $scope.showElement[el] = true;
-    };
-    
-    $scope.hideTooltip = function(el){
-        $scope.showElement[el] = false;
-    };
-}]);
 
 angular.module('orcidApp').controller('EmailPreferencesCtrl',['$scope', 'prefsSrvc', function ($scope, prefsSrvc) {
     $scope.prefsSrvc = prefsSrvc;
@@ -433,46 +364,7 @@ angular.module('orcidApp').controller('SecurityQuestionEditCtrl', ['$scope', '$c
     };
 }]);
 
-angular.module('orcidApp').controller('PasswordEditCtrl', ['$scope', '$http', function ($scope, $http) {
-    $scope.getChangePassword = function() {
-        $.ajax({
-            url: getBaseUri() + '/account/change-password.json',
-            dataType: 'json',
-            success: function(data) {
-                $scope.changePasswordPojo = data;
-                $scope.$apply();
-                $scope.zIndexfixIE7();
-            }
-        }).fail(function() {
-            // something bad is happening!
-            console.log("error with change password");
-        });
-    };
 
-    $scope.getChangePassword();
-
-    $scope.zIndexfixIE7 = function(){
-        fixZindexIE7('#password-edit', 999999);
-        fixZindexIE7('#password-edit .relative', 99999);
-    };
-
-    $scope.saveChangePassword = function() {
-        $.ajax({
-            url: getBaseUri() + '/account/change-password.json',
-            type: 'POST',
-            data: angular.toJson($scope.changePasswordPojo),
-            contentType: 'application/json;charset=UTF-8',
-            dataType: 'json',
-            success: function(data) {
-                $scope.changePasswordPojo = data;
-                $scope.$apply();
-            }
-        }).fail(function() {
-            // something bad is happening!
-            console.log("error with edit password");
-        });
-    };
-}]);
 
 
 
@@ -1149,101 +1041,7 @@ angular.module('orcidApp').controller('ClaimCtrl', ['$scope', '$compile', 'commo
     $scope.getClaim();
 }]);
 
-angular.module('orcidApp').controller('VerifyEmailCtrl', ['$scope', '$compile', 'emailSrvc', 'initialConfigService', function ($scope, $compile, emailSrvc, initialConfigService) {
-    $scope.loading = true;
-    $scope.getEmails = function() {
-        $.ajax({
-            url: getBaseUri() + '/account/emails.json',
-            // type: 'POST',
-            // data: $scope.emailsPojo,
-            dataType: 'json',
-            success: function(data) {
-                var configuration = initialConfigService.getInitialConfiguration();
-                var primeVerified = false;
 
-                $scope.verifiedModalEnabled = configuration.showModalManualEditVerificationEnabled;
-                $scope.emailsPojo = data;
-                $scope.$apply();
-                for (i in $scope.emailsPojo.emails) {
-                    if ($scope.emailsPojo.emails[i].primary  == true) {
-                        $scope.primaryEmail = $scope.emailsPojo.emails[i].value;
-                        if ($scope.emailsPojo.emails[i].verified) {
-                            primeVerified = true;
-                        }
-                    };
-                };
-                if (!primeVerified && !getBaseUri().contains("sandbox")) {
-                    var colorboxHtml = $compile($('#verify-email-modal').html())($scope);
-                    $scope.$apply();
-                    $.colorbox({
-                        html : colorboxHtml,
-                        escKey:false,
-                        overlayClose:false,
-                        transition: 'fade',
-                        close: '',
-                        scrolling: false
-                    });
-                    $.colorbox.resize({width:"500px"});
-                };
-                $scope.loading = false;
-                $scope.$apply();
-            }
-        }).fail(function() {
-            // something bad is happening!
-            console.log("error with multi email");
-        });
-    };
-
-    $scope.verifyEmail = function() {
-        var colorboxHtml = null;
-        $.ajax({
-            url: getBaseUri() + '/account/verifyEmail.json',
-            type: 'get',
-            data:  { "email": $scope.primaryEmail },
-            contentType: 'application/json;charset=UTF-8',
-            dataType: 'json',
-            success: function(data) {
-                // alert( "Verification Email Send To: " +
-                // $scope.emailsPojo.emails[idx].value);
-            }
-        }).fail(function() {
-            // something bad is happening!
-            console.log("error with multi email");
-        });
-        
-        colorboxHtml = $compile($('#verify-email-modal-sent').html())($scope);
-
-        $scope.emailSent = true;
-        $.colorbox({
-            html : colorboxHtml,
-            escKey: true,
-            overlayClose: true,
-            transition: 'fade',
-            close: '',
-            scrolling: false
-                    });
-        $.colorbox.resize({height:"200px", width:"500px"});
-    };
-
-    $scope.closeColorBox = function() {
-        $.ajax({
-            url: getBaseUri() + '/account/delayVerifyEmail.json',
-            type: 'get',
-            contentType: 'application/json;charset=UTF-8',
-            success: function(data) {
-                // alert( "Verification Email Send To: " +
-                // $scope.emailsPojo.emails[idx].value);
-            }
-        }).fail(function() {
-            // something bad is happening!
-            console.log("error with multi email");
-        });
-        $.colorbox.close();
-    };
-
-    $scope.emailSent = false;
-    $scope.getEmails();
-}]);
 
 angular.module('orcidApp').controller('ClaimThanks', ['$scope', '$compile', function ($scope, $compile) {
     $scope.showThanks = function () {
