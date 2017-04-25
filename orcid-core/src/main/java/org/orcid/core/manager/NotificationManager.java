@@ -28,6 +28,7 @@ import org.orcid.jaxb.model.notification.amended_v2.AmendedSection;
 import org.orcid.jaxb.model.notification.permission_v2.Item;
 import org.orcid.jaxb.model.notification.permission_v2.NotificationPermissions;
 import org.orcid.jaxb.model.notification_v2.Notification;
+import org.orcid.persistence.jpa.entities.ActionableNotificationEntity;
 import org.orcid.persistence.jpa.entities.ClientDetailsEntity;
 import org.orcid.persistence.jpa.entities.ProfileEntity;
 
@@ -35,9 +36,9 @@ public interface NotificationManager {
 
     // void sendRegistrationEmail(RegistrationEntity registration, URI baseUri);
 
-    void sendWelcomeEmail(OrcidProfile orcidProfile, String email);
+    void sendWelcomeEmail(String userOrcid, String email);
 
-    void sendVerificationEmail(OrcidProfile orcidProfile, String email);
+    void sendVerificationEmail(String userOrcid, String email);
 
     public void sendVerificationReminderEmail(OrcidProfile orcidProfile, String email);
 
@@ -51,7 +52,7 @@ public interface NotificationManager {
 
     public String deriveEmailFriendlyName(ProfileEntity profileEntity);
 
-    void sendNotificationToAddedDelegate(OrcidProfile grantingUser, List<DelegationDetails> delegatesGrantedByUser);
+    void sendNotificationToAddedDelegate(String userGrantingPermission, DelegationDetails ... delegatesGrantedByUser);
 
     void sendAmendEmail(String orcid, AmendedSection amendedSection, Item item);
 
@@ -59,19 +60,21 @@ public interface NotificationManager {
 
     void sendAmendEmail(OrcidProfile amendedProfile, AmendedSection amendedSection, Collection<Item> activities);
 
-    void sendOrcidDeactivateEmail(OrcidProfile orcidToDeactivate);
+    void sendOrcidDeactivateEmail(String userOrcid);
 
-    void sendOrcidLockedEmail(OrcidProfile orcidToLock);
+    void sendOrcidLockedEmail(String orcidToLock);
 
+    void sendApiRecordCreationEmail(String toEmail, String orcid);
+    
     void sendApiRecordCreationEmail(String toEmail, OrcidProfile createdProfile);
 
-    void sendEmailAddressChangedNotification(OrcidProfile updatedProfile, String oldEmail);
+    void sendEmailAddressChangedNotification(String currentUserOrcid, String newEmail, String oldEmail);
 
     void sendClaimReminderEmail(OrcidProfile orcidProfile, int daysUntilActivation);
 
     public boolean sendPrivPolicyEmail2014_03(OrcidProfile orcidProfile);
 
-    void sendDelegationRequestEmail(OrcidProfile managed, OrcidProfile trusted, String link);
+    void sendDelegationRequestEmail(String managedOrcid, String trustedOrcid, String link);
 
     public List<Notification> findUnsentByOrcid(String orcid);
 
@@ -99,7 +102,7 @@ public interface NotificationManager {
 
     public Notification flagAsArchived(String orcid, Long id) throws OrcidNotificationAlreadyReadException;
 
-    Notification flagAsArchived(String orcid, Long id, boolean checkSource) throws OrcidNotificationAlreadyReadException;
+    Notification flagAsArchived(String orcid, Long id, boolean validateForApi) throws OrcidNotificationAlreadyReadException;
 
     public Notification setActionedAndReadDate(String orcid, Long id);
 
@@ -115,8 +118,16 @@ public interface NotificationManager {
 
     public String buildAuthorizationUrlForInstitutionalSignIn(ClientDetailsEntity clientDetails) throws UnsupportedEncodingException;
     
-    public void sendAutoDeprecateNotification(OrcidProfile orcidProfile, String deprecatedOrcid);
+    public void sendAutoDeprecateNotification(String primaryOrcid, String deprecatedOrcid);
 
     NotificationPermissions findPermissionsByOrcidAndClient(String orcid, String client, int firstResult, int maxResults);
+
+    int getUnreadCount(String orcid);
+    
+    void flagAsRead(String orcid, Long id);
+
+    ActionableNotificationEntity findActionableNotificationEntity(Long id); //pass trough to (ActionableNotificationEntity) find(id) and cast.
+    
+    boolean sendVerifiedRequiredAnnouncement2017(OrcidProfile orcidProfile);
 
 }

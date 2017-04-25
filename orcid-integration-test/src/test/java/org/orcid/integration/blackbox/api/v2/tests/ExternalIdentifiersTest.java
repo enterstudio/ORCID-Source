@@ -47,7 +47,7 @@ import com.sun.jersey.api.client.ClientResponse;
  * 
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "classpath:test-publicV2-context.xml" })
+@ContextConfiguration(locations = { "classpath:test-context.xml" })
 public class ExternalIdentifiersTest extends BlackBoxBaseV2Release {    
     @Resource(name = "memberV2ApiClient_rc2")
     private org.orcid.integration.blackbox.api.v2.rc2.MemberV2ApiClientImpl memberV2ApiClient_rc2;
@@ -282,7 +282,7 @@ public class ExternalIdentifiersTest extends BlackBoxBaseV2Release {
     private Long createExternalIdentifier_rc2(String name, org.orcid.jaxb.model.common_v2.Visibility defaultUserVisibility) throws InterruptedException, JSONException {
         //Change user visibility if needed
         if(!defaultUserVisibility.equals(currentUserVisibility)) {
-            changeDefaultUserVisibility(webDriver, defaultUserVisibility);
+            changeDefaultUserVisibility(webDriver, defaultUserVisibility, false);
             currentUserVisibility = defaultUserVisibility;
         }
       //Get the access token
@@ -867,7 +867,7 @@ public class ExternalIdentifiersTest extends BlackBoxBaseV2Release {
     private Long createExternalIdentifier(String name, org.orcid.jaxb.model.common_v2.Visibility defaultUserVisibility) throws InterruptedException, JSONException {
         //Change user visibility if needed
         if(!defaultUserVisibility.equals(currentUserVisibility)) {
-            changeDefaultUserVisibility(webDriver, defaultUserVisibility);
+            changeDefaultUserVisibility(webDriver, defaultUserVisibility, false);
             currentUserVisibility = defaultUserVisibility;
         }
         

@@ -225,8 +225,7 @@ GroupedActivities.prototype.key = function(activityIdentifiers) {
             key += activityIdentifiers[idPath];
     } else if (activityIdentifiers[idTypePath]) {    
         // ISSN is misused too often to identify a work
-        if (activityIdentifiers[idTypePath].value != 'issn'
-                && (activityIdentifiers[relationship] == null || activityIdentifiers[relationship].value != 'part-of')
+        if ((activityIdentifiers[relationship] == null || activityIdentifiers[relationship].value != 'part-of')
                 && activityIdentifiers[idPath] != null
                 && activityIdentifiers[idPath].value != null
                 && activityIdentifiers[idPath].value != '') {           
@@ -478,48 +477,3 @@ ActSortState.prototype.sortBy = function(key) {
     init();
 
 })(jQuery);
-
-/*============================================================
-Print public record
-============================================================*/
-
-var printFunc = function() {
-    window.frames['printRecordFrame'].focus();
-    window.frames['printRecordFrame'].print();
-    setTimeout(
-        function () {
-            $('#printRecordFrame').unbind('load');
-            $(".printRecordFrameContainer").remove();
-        },
-        500
-    );
-};
-
-var printFrameReadyToPrint = function (func) {
-    var frame = window.frames['printRecordFrame'];
-    // Step 1: make sure angular 1 is ready by putting a function on the angular apply queue
-    frame.angular.element(frame.document.documentElement).scope().$root.$apply(
-            function() {
-                // Step 2: if JQuery has any outstanding request repeat otherwise call otherwise print
-                frame.$.active>0?setTimeout(printFrameReadyToPrint):printFunc();
-            }
-    );
-}
-
-function printPublicRecord(url){
-    $('#printRecord').on(
-        'click',
-        function(evt) {
-            evt.preventDefault();
-            $(".printRecordFrameContainer").remove();
-
-            if( $(".printRecordFrameContainer").length <= 0 ){
-                $('body').append('<iframe src="' + url + '" id="printRecordFrame" class="printRecordFrameContainer" name="printRecordFrame"></iframe>');
-            }
-            $('#printRecordFrame').bind(
-                'load', // jquery thinks it's ready
-                function () { printFrameReadyToPrint(printFunc); }
-            );
-        }
-    ); 
-}

@@ -39,6 +39,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.orcid.core.locale.LocaleManager;
 import org.orcid.core.manager.EncryptionManager;
@@ -56,13 +57,17 @@ import org.orcid.persistence.jpa.entities.ProfileEntity;
 import org.orcid.test.DBUnitTest;
 import org.orcid.test.OrcidJUnit4ClassRunner;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.gargoylesoftware.htmlunit.javascript.host.Console;
 
 /**
  * @author Angel Montenegro
  */
 @RunWith(OrcidJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "classpath:orcid-core-context.xml", "classpath:orcid-frontend-web-servlet.xml" })
+@WebAppConfiguration
+@ContextConfiguration(locations = { "classpath:orcid-core-context.xml", "classpath:orcid-frontend-web-servlet.xml", "classpath:statistics-core-context.xml" })
 public class PublicProfileControllerTest extends DBUnitTest {
     
     private static final List<String> DATA_FILES = Arrays.asList("/data/SecurityQuestionEntityData.xml", "/data/SourceClientDetailsEntityData.xml",
@@ -88,12 +93,15 @@ public class PublicProfileControllerTest extends DBUnitTest {
     private EncryptionManager encryptionManager;
     
     @Mock
-    private HttpServletRequest request;
+    //private HttpServletRequest request;
+    private HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    
     
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
         assertNotNull(publicProfileController);
+        Mockito.when(request.getRequestURI()).thenReturn("/");
      }
     
     @BeforeClass

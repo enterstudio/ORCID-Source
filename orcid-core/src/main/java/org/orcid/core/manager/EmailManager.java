@@ -16,9 +16,12 @@
  */
 package org.orcid.core.manager;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.orcid.core.manager.read_only.EmailManagerReadOnly;
 import org.orcid.jaxb.model.record_v2.Email;
 import org.orcid.jaxb.model.record_v2.Emails;
+import org.orcid.persistence.jpa.entities.EmailEntity;
 
 
 /**
@@ -28,9 +31,9 @@ import org.orcid.jaxb.model.record_v2.Emails;
  */
 public interface EmailManager extends EmailManagerReadOnly {
 
-    void updateEmails(String orcid, Emails emails);
+    void updateEmails(HttpServletRequest request, String orcid, Emails emails);
 
-    void addEmail(String orcid, Email email);
+    void addEmail(HttpServletRequest request, String orcid, Email email);
     
     void removeEmail(String orcid, String email);
 
@@ -58,4 +61,6 @@ public interface EmailManager extends EmailManagerReadOnly {
      *         client source of the record allows auto deprecating records
      */
     boolean isAutoDeprecateEnableForEmail(String email);
+
+    void update(EmailEntity emailEntity);
 }

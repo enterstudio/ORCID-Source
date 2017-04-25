@@ -47,7 +47,7 @@ import com.sun.jersey.api.client.ClientResponse;
  * 
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "classpath:test-publicV2-context.xml" })
+@ContextConfiguration(locations = { "classpath:test-context.xml" })
 public class OtherNamesTest extends BlackBoxBaseV2Release {
     @Resource(name = "memberV2ApiClient_rc2")
     private org.orcid.integration.blackbox.api.v2.rc2.MemberV2ApiClientImpl memberV2ApiClient_rc2;
@@ -98,7 +98,7 @@ public class OtherNamesTest extends BlackBoxBaseV2Release {
 
     private void changeDefaultUserVisibility(org.orcid.jaxb.model.common_v2.Visibility v) {
         if (!v.equals(currentDefaultVisibility)) {
-            changeDefaultUserVisibility(webDriver, v);
+            changeDefaultUserVisibility(webDriver, v, false);
             currentDefaultVisibility = v;
         }
     }

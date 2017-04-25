@@ -29,6 +29,18 @@
 	        <div class="row">
 	            <strong class="green">${springMacroRequestContext.getMessage("manage.email.my_email_addresses")}</strong>
 	        </div>
+	        <!-- Unverified set primary -->
+			<div ng-show="emailSrvc.popUp && showUnverifiedEmailSetPrimaryBox" class="grey-box">
+				<h4><@orcid.msg 'workspace.your_primary_email_new' /></h4>
+				<p><@orcid.msg 'workspace.youve_changed' /></p>
+				<p><@orcid.msg 'workspace.you_need_to_verify' /></p>
+				<p><@orcid.msg 'workspace.ensure_future_access2' /><br />
+				<p><strong>{{emailSrvc.getEmailPrimary().value}}</strong></p>
+				<p><@orcid.msg 'workspace.ensure_future_access3' /> <a target="_blank" href="${knowledgeBaseUri}/articles/149457"><@orcid.msg 'workspace.ensure_future_access4' /></a> <@orcid.msg 'workspace.ensure_future_access5' /> <a target="_blank" href="mailto:<@orcid.msg 'workspace.link.email.support' />"><@orcid.msg 'workspace.link.email.support' /></a>.</p>
+					<div class="topBuffer">
+						<a ng-click="closeUnverifiedEmailSetPrimaryBox()"><@orcid.msg 'freemarker.btnclose' /></a>
+					</div>
+			</div>					     
 	        <!-- Email table -->
 	        <div class="table-responsive bottomBuffer" style="position: static">
 	            <table class="table" style="position: static">
@@ -94,7 +106,7 @@
 	                        </div>
 	                    </td>
 	                </tr>
-	            </table>
+	            </table>            
 				<!-- Delete Email Box -->
 				<div ng-if="emailSrvc.popUp && showDeleteBox" class="delete-email-box grey-box">					
 					<div style="margin-bottom: 10px;">
@@ -167,15 +179,15 @@
     				<p>${springMacroRequestContext.getMessage("manage.send_email_to_primary_1")} <a href="${baseUri}/inbox" target="_blank">${springMacroRequestContext.getMessage("manage.send_email_to_primary_2")}</a>${springMacroRequestContext.getMessage("manage.send_email_to_primary_3")}</p>
         			<form class="form-inline">
         				<div class="form-group">							
-            				<div class="input-group">
-                				<select id="sendEmailFrequencyDays" name="sendEmailFrequencyDays" class="input-xlarge" ng-model="prefsSrvc.prefs.sendEmailFrequencyDays" ng-change="prefsSrvc.clearMessage()">
+            				<div class="input-group">            					
+                				<select id="sendEmailFrequencyDays" name="sendEmailFrequencyDays" class="input-xlarge" ng-model="prefsSrvc.prefs['email_frequency']" ng-change="prefsSrvc.clearMessage()">
          							<#list sendEmailFrequencies?keys as key>
     									<option value="${key}">${sendEmailFrequencies[key]}</option>
 									</#list>
                     			</select>
                 			</div>
             			</div>
-            			<button ng-click="prefsSrvc.savePrivacyPreferences()" class="btn btn-primary">${springMacroRequestContext.getMessage("manage.send_email_frequency_save")}</button>
+            			<button ng-click="prefsSrvc.updateEmailFrequency()" class="btn btn-primary">${springMacroRequestContext.getMessage("manage.send_email_frequency_save")}</button>
             			<small class="green" ng-show="prefsSrvc.saved">${springMacroRequestContext.getMessage("manage.send_email_frequency_saved")}</small>    
         			</form>
     			</div>

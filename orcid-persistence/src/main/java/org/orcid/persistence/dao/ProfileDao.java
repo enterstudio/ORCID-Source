@@ -24,8 +24,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.orcid.jaxb.model.clientgroup.ClientType;
 import org.orcid.jaxb.model.clientgroup.MemberType;
 import org.orcid.jaxb.model.common_v2.Visibility;
-import org.orcid.jaxb.model.message.Locale;
-import org.orcid.jaxb.model.message.OrcidType;
+import org.orcid.jaxb.model.common_v2.Locale;
+import org.orcid.jaxb.model.common_v2.OrcidType;
 import org.orcid.persistence.jpa.entities.EmailEventType;
 import org.orcid.persistence.jpa.entities.IndexingStatus;
 import org.orcid.persistence.jpa.entities.ProfileEntity;
@@ -155,5 +155,12 @@ public interface ProfileDao extends GenericDao<ProfileEntity, String> {
 
     boolean unreviewProfile(String orcid);
     
-    List<Object[]> findProfilesWhereNamesAreNotMigrated(int batchSize);    
+    List<Object[]> findProfilesWhereNamesAreNotMigrated(int batchSize);
+    
+    boolean updateNotificationsPreferences(String orcid, boolean sendChangeNotifications, boolean sendAdministrativeChangeNotifications, boolean sendOrcidNews,
+            boolean sendMemberUpdateRequests);
+    
+    boolean updateDefaultVisibility(String orcid, Visibility visibility);
+    
+    boolean updateSendEmailFrequencyDays(String orcid, Float sendEmailFrequencyDays);
 }

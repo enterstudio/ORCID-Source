@@ -29,7 +29,6 @@ import javax.annotation.Resource;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.orcid.core.adapter.Jpa2JaxbAdapter;
 import org.orcid.core.locale.LocaleManager;
 import org.orcid.core.manager.AddressManager;
 import org.orcid.core.manager.AffiliationsManager;
@@ -39,26 +38,23 @@ import org.orcid.core.manager.EmailManager;
 import org.orcid.core.manager.EncryptionManager;
 import org.orcid.core.manager.ExternalIdentifierManager;
 import org.orcid.core.manager.NotificationManager;
-import org.orcid.core.manager.OrcidProfileManager;
 import org.orcid.core.manager.OtherNameManager;
 import org.orcid.core.manager.PeerReviewManager;
-import org.orcid.core.manager.PersonalDetailsManager;
 import org.orcid.core.manager.ProfileEntityCacheManager;
 import org.orcid.core.manager.ProfileEntityManager;
 import org.orcid.core.manager.ProfileFundingManager;
 import org.orcid.core.manager.ProfileKeywordManager;
 import org.orcid.core.manager.RecordNameManager;
 import org.orcid.core.manager.ResearcherUrlManager;
-import org.orcid.core.manager.SourceManager;
 import org.orcid.core.manager.WorkManager;
 import org.orcid.core.manager.read_only.impl.ProfileEntityManagerReadOnlyImpl;
 import org.orcid.core.oauth.OrcidOauth2TokenDetailService;
 import org.orcid.core.security.visibility.OrcidVisibilityDefaults;
 import org.orcid.jaxb.model.clientgroup.MemberType;
+import org.orcid.jaxb.model.common_v2.Locale;
+import org.orcid.jaxb.model.common_v2.OrcidType;
 import org.orcid.jaxb.model.common_v2.Visibility;
-import org.orcid.jaxb.model.message.Locale;
 import org.orcid.jaxb.model.message.OrcidProfile;
-import org.orcid.jaxb.model.message.OrcidType;
 import org.orcid.jaxb.model.message.ScopePathType;
 import org.orcid.jaxb.model.notification.amended_v2.AmendedSection;
 import org.orcid.jaxb.model.record_v2.Biography;
@@ -87,6 +83,7 @@ import org.orcid.pojo.ajaxForm.Claim;
 import org.orcid.pojo.ajaxForm.PojoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -95,9 +92,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProfileEntityManagerImpl extends ProfileEntityManagerReadOnlyImpl implements ProfileEntityManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProfileEntityManagerImpl.class);    
-
-    @Resource
-    private Jpa2JaxbAdapter jpa2JaxbAdapter;
 
     @Resource
     private AffiliationsManager affiliationsManager;
@@ -127,9 +121,6 @@ public class ProfileEntityManagerImpl extends ProfileEntityManagerReadOnlyImpl i
     private ProfileKeywordManager profileKeywordManager;
 
     @Resource
-    private PersonalDetailsManager personalDetailsManager;
-
-    @Resource
     private OtherNameManager otherNameManager;
 
     @Resource
@@ -151,13 +142,7 @@ public class ProfileEntityManagerImpl extends ProfileEntityManagerReadOnlyImpl i
     private UserConnectionDao userConnectionDao;
     
     @Resource
-    private OrcidProfileManager orcidProfileManager;
-    
-    @Resource
     private NotificationManager notificationManager;
-    
-    @Resource
-    private SourceManager sourceManager;
     
     @Resource
     private OrcidOauth2TokenDetailService orcidOauth2TokenService;
@@ -387,8 +372,12 @@ public class ProfileEntityManagerImpl extends ProfileEntityManagerReadOnlyImpl i
                         Set<ScopePathType> scopesGrantedToClient = ScopePathType.getScopesFromSpaceSeparatedString(token.getScope());
                         Map<ScopePathType, String> scopePathMap = new HashMap<ScopePathType, String>();
                         String scopeFullPath = ScopePathType.class.getName() + ".";
-                        for (ScopePathType tempScope : scopesGrantedToClient) {                            
-                            scopePathMap.put(tempScope, localeManager.resolveMessage(scopeFullPath + tempScope.toString()));
+                        for (ScopePathType tempScope : scopesGrantedToClient) {        
+                            try {
+                                scopePathMap.put(tempScope, localeManager.resolveMessage(scopeFullPath + tempScope.toString()));
+                            } catch (NoSuchMessageException e) {
+                                LOGGER.warn("No message to display for scope " + tempScope.toString());
+                            }
                         }
                         //If there is at least one scope in this token, fill the application summary element
                         if(!scopePathMap.isEmpty()) {
@@ -516,7 +505,9 @@ public class ProfileEntityManagerImpl extends ProfileEntityManagerReadOnlyImpl i
         profile.setIndexingStatus(IndexingStatus.REINDEX);
         profile.setClaimed(true);
         profile.setCompletedDate(new Date());
-        profile.setLocale(locale);
+        if(locale != null) {
+            profile.setLocale(org.orcid.jaxb.model.common_v2.Locale.fromValue(locale.value()));
+        }
         if(claim != null) {
             profile.setSendChangeNotifications(claim.getSendChangeNotifications().getValue());
             profile.setSendOrcidNews(claim.getSendOrcidNews().getValue());
@@ -645,10 +636,21 @@ public class ProfileEntityManagerImpl extends ProfileEntityManagerReadOnlyImpl i
         //Delete all connections
         userConnectionDao.deleteByOrcid(orcid);                
         
-        OrcidProfile deactivated = orcidProfileManager.retrieveOrcidProfile(orcid);
+        notificationManager.sendAmendEmail(orcid, AmendedSection.UNKNOWN, null);
+        return true;
+    }
+    
+    @Override
+    @Transactional
+    public boolean reactivateRecord(String orcid) {
+        ProfileEntity toReactivate = profileDao.find(orcid);
+        toReactivate.setLastModified(new Date());
+        toReactivate.setDeactivationDate(null);
+        profileDao.merge(toReactivate);
+        profileDao.flush();
         
-        notificationManager.sendAmendEmail(deactivated, AmendedSection.UNKNOWN);
-        return false;
+        notificationManager.sendAmendEmail(orcid, AmendedSection.UNKNOWN, null);
+        return true;
     }
 
     @Override
@@ -674,4 +676,59 @@ public class ProfileEntityManagerImpl extends ProfileEntityManagerReadOnlyImpl i
         recordNameEntity.setFamilyName(familyName);
         profileDao.merge(profileEntity);
     }
+
+    @Override
+    public void updatePassword(String orcid, String password) {
+        String encryptedPassword = encryptionManager.hashForInternalUse(password);
+        profileDao.updateEncryptedPassword(orcid, encryptedPassword);
+    }
+
+    @Override
+    public void updateSecurityQuestion(String orcid, Integer questionId, String answer) {
+        String encryptedAnswer = encryptionManager.encryptForInternalUse(answer);
+        profileDao.updateSecurityQuestion(orcid, questionId, questionId != null ? encryptedAnswer : null);
+    }
+
+    @Override
+    public boolean isProfileDeprecated(String orcid) {
+        return profileDao.isProfileDeprecated(orcid);
+    }
+
+    @Override
+    public void updateIpAddress(String orcid, String ipAddress) {
+        profileDao.updateIpAddress(orcid, ipAddress);
+    }
+
+    @Override
+    public Locale retrieveLocale(String orcid) {
+        return profileDao.retrieveLocale(orcid);
+    }
+
+    /**
+     * Set the locked status of an account to true
+     * 
+     * @param orcid
+     *            the id of the profile that should be locked
+     * @return true if the account was locked
+     */
+    @Override
+    public boolean lockProfile(String orcid, String lockReason, String description) {
+        boolean wasLocked = profileDao.lockProfile(orcid, lockReason, description);
+        if (wasLocked) {
+            notificationManager.sendOrcidLockedEmail(orcid);
+        }
+        return wasLocked;
+    }
+    
+    /**
+     * Set the locked status of an account to false
+     * 
+     * @param orcid
+     *            the id of the profile that should be unlocked
+     * @return true if the account was unlocked
+     */
+    @Override
+    public boolean unlockProfile(String orcid) {
+        return profileDao.unlockProfile(orcid);
+    }   
 }

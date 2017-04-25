@@ -27,7 +27,6 @@ import javax.annotation.Resource;
 import javax.ws.rs.core.Response;
 
 import org.codehaus.jettison.json.JSONException;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,7 +47,7 @@ import com.sun.jersey.api.client.ClientResponse;
  * 
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "classpath:test-publicV2-context.xml" })
+@ContextConfiguration(locations = { "classpath:test-context.xml" })
 public class KeywordsTest extends BlackBoxBaseV2Release {
 
     @Resource(name = "memberV2ApiClient_rc2")
@@ -91,7 +90,7 @@ public class KeywordsTest extends BlackBoxBaseV2Release {
 
     private void changeDefaultUserVisibility(org.orcid.jaxb.model.common_v2.Visibility v) {
         if (!v.equals(currentDefaultVisibility)) {
-            changeDefaultUserVisibility(webDriver, v);
+            changeDefaultUserVisibility(webDriver, v, false);
             currentDefaultVisibility = v;
         }
     }
