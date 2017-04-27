@@ -59,7 +59,7 @@
 	requireAll(__webpack_require__(33));
 	//requireAll(require.context("./app/modules", true, /^\.\/.*\.ts$/));
 	requireAll(__webpack_require__(35));
-	requireAll(__webpack_require__(55));
+	//requireAll(require.context("./app/services", true, /^\.\/.*\.ts$/));
 
 /***/ }),
 /* 1 */
@@ -94,6 +94,8 @@
 	 *  - 7 - Angular Multiselect Module
 	 *  
 	 */
+
+	 alert("test yay");
 
 	var orcidNgModule = angular.module('orcidApp', ['ngCookies','ngSanitize', 'ui.multiselect', 'vcRecaptcha','ui.bootstrap']);
 
@@ -13999,19 +14001,6 @@
 	    };
 	    return serv;
 	}]);
-
-/***/ }),
-/* 55 */
-/***/ (function(module, exports) {
-
-	function webpackContext(req) {
-		throw new Error("Cannot find module '" + req + "'.");
-	}
-	webpackContext.keys = function() { return []; };
-	webpackContext.resolve = webpackContext;
-	module.exports = webpackContext;
-	webpackContext.id = 55;
-
 
 /***/ })
 /******/ ]);
