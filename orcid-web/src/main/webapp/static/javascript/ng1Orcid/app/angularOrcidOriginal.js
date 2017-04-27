@@ -28,6 +28,8 @@
  *  
  */
 
+ alert("test yay");
+
 var orcidNgModule = angular.module('orcidApp', ['ngCookies','ngSanitize', 'ui.multiselect', 'vcRecaptcha','ui.bootstrap']);
 
 angular.element(function() {
