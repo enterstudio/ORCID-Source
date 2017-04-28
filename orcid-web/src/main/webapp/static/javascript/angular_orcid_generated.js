@@ -94,7 +94,7 @@
 	 *  - 7 - Angular Multiselect Module
 	 *  
 	 */
-	alert("testyay1");
+	alert("testyay3");
 
 	var orcidNgModule = angular.module('orcidApp', ['ngCookies','ngSanitize', 'ui.multiselect', 'vcRecaptcha','ui.bootstrap']);
 
