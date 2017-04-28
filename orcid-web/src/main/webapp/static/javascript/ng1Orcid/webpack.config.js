@@ -45,7 +45,7 @@ module.exports = {
     scripts: {
         build: "webpack -d",
         //prebuild: "npm install",
-        //watch: "webpack --watch -d"
+        watch: "webpack --watch -d &"
     },
     //watch: true
 };
