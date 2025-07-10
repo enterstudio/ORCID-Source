@@ -160,7 +160,7 @@ the software.
                 <artifactId>maven-resources-plugin</artifactId>
                 <configuration>
                     <escapeString>\</escapeString>
-                    <outputDirectory />
+                    <outputDirectory/>
                 </configuration>
             </plugin>
             <plugin>
@@ -492,7 +492,7 @@ the software.
             <dependency>
                 <groupId>commons-beanutils</groupId>
                 <artifactId>commons-beanutils</artifactId>
-                <version>1.8.3</version>
+                <version>1.11.0</version>
                 <scope>compile</scope>
             </dependency>
 
@@ -844,7 +844,7 @@ the software.
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-log4j12</artifactId>
-                <version>1.6.2</version>
+                <version>1.7.34</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
